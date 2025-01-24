@@ -1,0 +1,23 @@
+{
+  "distributed-cache": {
+    "backups": {
+      "LON": {
+        "backup": {
+          "strategy": "SYNC",
+          "failure-policy": "WARN"
+        }
+      }
+    },
+    "mode": "SYNC",
+    "encoding": {
+      "media-type": "application/x-protostream"
+    },
+    "indexing": {
+      "indexed-entities": [
+        "com.redhat.PlayerScore"
+      ],
+      "enabled": true
+    },
+    "statistics": true
+  }
+}

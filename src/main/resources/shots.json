@@ -1,0 +1,14 @@
+{
+  "distributed-cache": {
+    "statistics": true,
+    "encoding": {
+      "media-type": "application/x-protostream"
+    },
+    "indexing": {
+      "enabled": true,
+      "indexed-entities": [
+        "com.redhat.Shot"
+      ]
+    }
+  }
+}
