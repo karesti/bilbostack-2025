@@ -86,7 +86,7 @@ public class LeaderboardEndpoint {
       if(topTenQuery == null || !gameId.equals(currentGameId)) {
          gameId = currentGameId;
          topTenQuery = playersScores
-//                 select p.name, p.score from com.redhat.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC
+//                 select p.username, p.score from com.redhat.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC
                  .<PlayerScore>query("from com.redhat.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC")
                  .maxResults(10);
       }
