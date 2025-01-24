@@ -1,0 +1,144 @@
+@font-face{ 
+	font-family: 'dogica';
+	src: url('/fonts/dogica.woff') format('woff');
+}
+
+@font-face{ 
+	font-family: 'dogica-bold';
+	src: url('/fonts/dogicabold.woff') format('woff');
+}
+
+:root {
+    --fontFamily: 'dogica', sans-serif;
+    
+    --heading1FontSize: 20px;
+    --heading1Margin: 0;
+    --heading1LineHeight: 28px;
+    --heading2FontSize: 18px;
+    --heading2Margin: 12px 0 10px;
+
+    --listMargin: 0;
+    --listFontSize: 16px;
+    --listItemMarginBottom: 2px;
+    --listItemLineHeight: 1.5;
+
+    --green : #7ac49e;
+    --dark-green: #161c01;
+    --dark-purple: #151628;
+    --light-purple: #343a62;
+    --ocean: #2795f5;
+    --gold: #efc100;
+    --silver: #939393;
+    --bronze: #c1947a;
+    --grid-bg: #14281d;
+    --sky: #64d8fa;
+
+}
+
+
+body {
+    position: relative;
+    font-family: var(--fontFamily);
+    display: grid;
+    background: var(--ocean);
+    overflow: hidden;
+    height: 100vh;
+    margin:0;
+    grid-template-rows: 100vh;
+    align-items: center;
+    justify-items: center;
+}
+
+body::before {
+    z-index: -1;
+    position:absolute;
+    content: '';
+    width:100vw;
+    height: 100vh;
+    background: url(/img/water-bg.svg) 0;
+    animation: water-xl 5s linear infinite alternate;
+}
+
+div#status {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto;
+    justify-content: center;
+    align-items: center;    
+    color: white;
+    font-family: var(--fontFamily);
+    font-size: 1em;
+    text-shadow: 2px 2px 0 var(--dark-green);
+    text-align: center;
+}
+div#status strong {
+    font-size: 1.2em;
+    align-self:flex-end;
+}
+div#status p {
+    line-height: 1.5;
+    margin:0;
+}
+
+article {
+    animation: .5s ease-in blipIn;
+ }
+
+article#dashboard svg { width: 600px; }
+
+article#replay {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    grid-gap: 3vw;
+    height: auto;
+    width: 600px;
+    padding: 1vw;
+    justify-items: center;
+    align-items: center;
+    grid-template-rows: repeat(4,auto);
+}
+
+article#replay h1 {
+    grid-column: 1 / 5;
+    color: white;
+    text-shadow: 2px 2px 0 var(--dark-green);
+}
+
+.hidden {
+    display:none;
+    transform: scaleY(0);
+    animation: .5s ease-out blipOut;
+}
+
+
+section {
+    padding: 1em;
+    max-width: 480px;
+    /* margin: 0 auto; */
+}
+#leaders {
+
+}
+
+@keyframes water-xl {
+    0% { background-position: 0 0; }
+    100% {  background-position: 10px 0; }
+  }
+
+@keyframes blipIn {
+    from {
+        transform: scaleY(0);
+    }
+    to {
+        transform: scaleY(1);
+    }
+}
+
+@keyframes blipOut {
+    from {
+        transform: scaleY(1);
+    }
+    to {
+        transform: scaleY(0);
+    }
+}

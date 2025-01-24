@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replay - Red Hat Summit 2021</title>
+    <style>
+        canvas {
+            border: 2px solid black;
+        }
+    </style>
+</head>
+<body>
+    <rh-battleship id="game-c538ddcce22a3a58" width="250" height="250" frame="0"></rh-battleship>
+    <input id="frame" value="0" type="number" min="0" step="1" onchange="e=> document.querySelector('rh-battleship').setAttribute('frame',e.target.value);">
+    <script src="/scripts/rh-battleship.js"></script>
+    <script>
+        let gameData = <% replayData %>;
+        let board = document.querySelector('rh-battleship');
+        let frame = document.getElementById('frame');
+        board.data = gameData;
+        frame.addEventListener('change', e => {
+            console.log("Changed:",e.target.value);
+            board.frame = e.target.value;
+            board.render();
+        }); 
+        board.frame = frame.value;
+
+        
+    </script>
+</body>
+</html>
