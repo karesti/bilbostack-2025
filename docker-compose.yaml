@@ -44,7 +44,7 @@ services:
     container_name: ispn-nyc-1
     environment:
       USER: admin
-      PASS: password
+      PASS: pass
     networks:
       - mynetwork
     command: -c infinispan-xsite.xml -Dinfinispan.site.name=NYC -Djgroups.mcast_port=46666
