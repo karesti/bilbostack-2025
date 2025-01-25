@@ -1,6 +1,6 @@
 # bilbostack-2025
 
-# 2021-leaderboard-service
+# leaderboard-service
 
 Leaderboard Service, baked with Quarkus and Infinispan
 
