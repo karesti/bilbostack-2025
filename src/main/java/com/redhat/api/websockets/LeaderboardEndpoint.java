@@ -30,14 +30,10 @@ public class LeaderboardEndpoint {
    RemoteCacheManager remoteCacheManager;
 
    @Inject
-   GameUtils gameUtils;
-
-   @Inject
    @Remote(PlayerScore.PLAYERS_SCORES)
    RemoteCache<String, PlayerScore> playersScores;
 
    Query<PlayerScore> topTenQuery;
-   String gameId = "";
 
    @OnOpen
    public void onOpen(Session session) {
@@ -64,27 +60,13 @@ public class LeaderboardEndpoint {
          return;
       }
 
-      if(gameUtils.isGameNotReady()) {
-         return;
-      }
-
       if(!remoteCacheManager.getCacheNames().contains(PlayerScore.PLAYERS_SCORES)) {
          Log.warn(String.format("%s cache does not exit", PlayerScore.PLAYERS_SCORES));
          return;
       }
 
-      if(playersScores == null) {
-         playersScores = remoteCacheManager.getCache(PlayerScore.PLAYERS_SCORES);
-      }
 
-      String currentGameId = gameUtils.getGameData().getId();
-
-      if(gameId.isEmpty()) {
-         gameId = currentGameId;
-      }
-
-      if(topTenQuery == null || !gameId.equals(currentGameId)) {
-         gameId = currentGameId;
+      if(topTenQuery == null ) {
          topTenQuery = playersScores
 //                 select p.username, p.score from com.redhat.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC
                  .<PlayerScore>query("from com.redhat.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC")

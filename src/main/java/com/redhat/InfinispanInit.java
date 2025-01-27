@@ -2,26 +2,17 @@ package com.redhat;
 
 import com.redhat.model.GameStatus;
 import com.redhat.model.PlayerScore;
-import com.redhat.model.Shot;
 import io.quarkus.infinispan.client.Remote;
-import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
-import io.vertx.core.json.JsonObject;
-import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
-import org.infinispan.commons.configuration.BasicConfiguration;
 import org.infinispan.commons.configuration.StringConfiguration;
-import org.jboss.resteasy.reactive.common.model.ResourceReader;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,15 +25,13 @@ import java.util.UUID;
 public class InfinispanInit {
 
    public static final String GAME_ID = "1e1348c774d01c7c";
+
    @Inject
    RemoteCacheManager cacheManager;
 
-   @ConfigProperty(name = "leaderboard.configure-infinispan", defaultValue = "false")
-   Boolean configureInfinispan;
    boolean init = false;
    Random random = new Random();
 
-   int[] scores = new int[]{0, 10, 10, 10, 20, 30, 50, 80, 130, 210};
    int[] bonus = new int[]{0, 20, 0, 30, 0, 0, 0, 0, 5, 10 };
    List<Player> randomPlayers = new ArrayList<>();
    List<String> randomNames = Arrays.asList(
@@ -59,40 +48,18 @@ public class InfinispanInit {
    @Remote(PlayerScore.PLAYERS_SCORES)
    RemoteCache<String, PlayerScore> playerScores;
 
-   @Inject
-   @Remote("game")
-   RemoteCache<String, String> game;
-
-   @Inject
-   @Remote(Shot.PLAYERS_SHOTS)
-   RemoteCache<String, Shot> playerShots;
-
    void onStart(@Observes StartupEvent ev) throws IOException {
-      // Create the NYC backup cache programatically
+      // Create the LON cache programmatically
+      String lonCache = new String(InfinispanInit.class.getClassLoader()
+              .getResourceAsStream("scores.json").readAllBytes(), StandardCharsets.UTF_8);
+      cacheManager.administration().getOrCreateCache(PlayerScore.PLAYERS_SCORES, new StringConfiguration(lonCache));
+
+      // Create the NYC backup cache programmatically
       cacheManager.switchToCluster("nyc-site");
       String nycCacheBackups = new String(InfinispanInit.class.getClassLoader()
               .getResourceAsStream("scores_nyc.json").readAllBytes(), StandardCharsets.UTF_8);
       cacheManager.administration().getOrCreateCache(PlayerScore.PLAYERS_SCORES, new StringConfiguration(nycCacheBackups));
       cacheManager.switchToDefaultCluster();
-
-      JsonObject json = new JsonObject();
-      json.put("uuid", GAME_ID);
-      json.put("date", "2021-04-08T17:38:35.421Z");
-      json.put("state", "active");
-      game.put("current-game", json.toString());
-
-      for (int i = 0; i < 2; i ++) {
-         for (String name: randomNames) {
-            String matchId = UUID.randomUUID().toString();
-            Player playerHuman = Player.create(name + "-" + i, matchId, true);
-            Player playerAI = Player.create("ai-" + name + "-" + i, matchId, false);
-            randomPlayers.add(playerHuman);
-            randomPlayers.add(playerAI);
-            playerScores.put(playerHuman.getPlayerScoreId(), playerHuman.toPlayerScore());
-            playerScores.put(playerAI.getPlayerScoreId(), playerAI.toPlayerScore());
-         }
-      }
-      init = true;
    }
 
    static class Player {
@@ -124,7 +91,7 @@ public class InfinispanInit {
 
    @Scheduled(every = "0.1s")
    public void createData() {
-      if(configureInfinispan && init) {
+      if(init) {
          int i = random.nextInt(randomPlayers.size());
 
          Player player = randomPlayers.get(i);
@@ -137,6 +104,19 @@ public class InfinispanInit {
                  actualPlayerScore.gameStatus(),
                  actualPlayerScore.bonus() + bonus[random.nextInt(bonus.length)]);
          playerScores.put(player.getPlayerScoreId(), newPlayerScore);
+      } else {
+         for (int i = 0; i < 2; i ++) {
+            for (String name: randomNames) {
+               String matchId = UUID.randomUUID().toString();
+               Player playerHuman = Player.create(name + "-" + i, matchId, true);
+               Player playerAI = Player.create("ai-" + name + "-" + i, matchId, false);
+               randomPlayers.add(playerHuman);
+               randomPlayers.add(playerAI);
+               playerScores.put(playerHuman.getPlayerScoreId(), playerHuman.toPlayerScore());
+               playerScores.put(playerAI.getPlayerScoreId(), playerAI.toPlayerScore());
+            }
+         }
+         init = true;
       }
    }
 }
