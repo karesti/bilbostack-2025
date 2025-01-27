@@ -39,6 +39,10 @@ You should be able to see in the console (LON and NYC):
 
 ![infinispan-console.png](infinispan-console.png)
 
+*Query:*
+```text
+select p.username, p.score from org.infinispan.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC
+```
 ## Testing Cross-Site Replication
 
 The app creates a cache in NYC, using active-active replication:
