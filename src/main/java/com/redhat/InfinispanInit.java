@@ -4,16 +4,25 @@ import com.redhat.model.GameStatus;
 import com.redhat.model.PlayerScore;
 import com.redhat.model.Shot;
 import io.quarkus.infinispan.client.Remote;
+import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
 import io.vertx.core.json.JsonObject;
+import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.commons.configuration.BasicConfiguration;
+import org.infinispan.commons.configuration.StringConfiguration;
+import org.jboss.resteasy.reactive.common.model.ResourceReader;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +67,14 @@ public class InfinispanInit {
    @Remote(Shot.PLAYERS_SHOTS)
    RemoteCache<String, Shot> playerShots;
 
-   void onStart(@Observes StartupEvent ev) {
+   void onStart(@Observes StartupEvent ev) throws IOException {
+      // Create the NYC backup cache programatically
+      cacheManager.switchToCluster("nyc-site");
+      String nycCacheBackups = new String(InfinispanInit.class.getClassLoader()
+              .getResourceAsStream("scores_nyc.json").readAllBytes(), StandardCharsets.UTF_8);
+      cacheManager.administration().getOrCreateCache(PlayerScore.PLAYERS_SCORES, new StringConfiguration(nycCacheBackups));
+      cacheManager.switchToDefaultCluster();
+
       JsonObject json = new JsonObject();
       json.put("uuid", GAME_ID);
       json.put("date", "2021-04-08T17:38:35.421Z");

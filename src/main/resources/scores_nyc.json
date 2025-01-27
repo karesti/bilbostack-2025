@@ -5,7 +5,7 @@
       "media-type": "application/x-protostream"
     },
     "backups": {
-      "NYC": {
+      "LON": {
         "backup": {
           "strategy": "ASYNC"
         }

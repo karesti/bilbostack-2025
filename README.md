@@ -1,129 +1,44 @@
-# bilbostack-2025
+# Bilbo Stack 2025
+To run this demo you need:
 
-# leaderboard-service
+* Docker / Podman
+* Java 21 or later
 
-Leaderboard Service, baked with Quarkus and Infinispan
+## Spin up Infinispan
+The docker compose file spins up
+* A LON cluster of 3
+* A NYC cluster of 1
 
-Run Infinispan with Docker
+Both cluster connect locally using Cross Site replication.
 
-`docker run -v $(pwd):/user-config  -p 11222:11222 -e USER="admin" -e PASS="pass" infinispan/server:12.0.1.Final`
+```shell
+docker/podman compose up
+```
+Use **admin/pass** and log in **LON** in your browser opening localhost:11222
+Use **admin/pass** and log in **NYC** in your browser opening localhost:31222
 
-## Scheduling properties for deployments
 
-Default values are 4s and 1s.
+## Build the Quarkus project
 
-```properties
-leaderboard.schedule=4s
-stats.schedule=1s
+The leaderboard is a Quarkus application what provides a leadeboard
+of a top 10 players.
+
+Data is stores in Infinispan, using Protobuf serialisation.
+The server keeps the schema.
+
+```shell
+./mvnw clean install
+java -jar ./target/quarkus-app/quarkus-run.jar  
 ```
 
-Change them in the deployment in containers using the following env variables:
+Open http://localhost:8080/ in your browser.
+The app inserts data and schedules scores.
 
-```bash
-LEADERBOARD_SCHEDULE='3s'
-STATS_SCHEDULE='0.5s''
-```
+This project does not use INDEXED caches.
+Queries are performed without specific indexes. 
+To improve queries performance, adding indexing is recommened.
+For simplicity in this demo, I did remove it.
 
-## Web Sockets
-
-### Leaderboard
-
-`ws://localhost:8080/leaderboard`
-
-Payload 
-
-```json
-[
-  {
-    "userId":"u6",
-    "matchId":"m1",
-    "gameId":"g1",
-    "human":true,
-    "userName": "Michael",
-    "score":12,
-    "timestamp":9090898,
-    "gameStatus":"PLAYING"
-  }, 
-  {
-    "userId":"u5",
-    "matchId":"m1",
-    "gameId":"g1",
-    "human":true,
-    "userName": "Jennifer",
-    "score":12,
-    "timestamp":9090898,
-    "gameStatus":"PLAYING"
-  }
-  ...
-]
-```
-### Stats
-`ws://localhost:8080/stats`
-
-Payload
-
-```json
-{
-  "games-id": "g1",
-  "games-status": "lobby",
-  "games-played": 190,
-  "total-hits": 199,
-  "total-misses": 30,
-  "total-sunk": 120,
-  "human-shots": 300,
-  "human-active": 21,
-  "human-win": 0,
-  "human-loss": 0,
-  "human-hits": 8,
-  "human-misses": 15,
-  "human-sunks": 12,
-  "human-carrier-sunks": 4,
-  "human-submarine-sunks": 5,
-  "human-destroyer-sunks": 2,
-  "human-battleship-sunks": 1,
-  "human-bonus": 0,
-  "ai-shots": 500,
-  "ai-active": 21,
-  "ai-win": 0,
-  "ai-loss": 0,
-  "ai-hits": 0,
-  "ai-misses": 0,
-  "ai-sunks": 0,
-  "ai-carrier-sunks": 0,
-  "ai-submarine-sunks": 0,
-  "ai-destroyer-sunks": 0,
-  "ai-battleship-sunks": 0,
-  "ai-bonus": 0
-}
-```
-
-## Run images (native or jvm)
-
-1. Run Infinispan
-
-```shell script
-./run-infinispan.sh
-```
-
-2. Build following the instructions the native or the jvm image (instructions in Dockerfile or Dockerfile.jvm)
-
-3. Run the application
-
-```shell script
-./run-app.sh
-```
-Access 
-* Infinispan Console in `http://localhost:11222`. Log using admin/pass credentials
-* Leaderboard: `http://localhost:8080`
-  
-
-`docker commit 2afe01858f8b quay.io/redhatdemo/2021-leaderboard-service`
-`docker push quay.io/redhatdemo/2021-leaderboard-service`
-
-
-Queries
-=======
-from com.redhat.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC
-select count(p.userId) from com.redhat.PlayerScore p WHERE p.human=true and p.score>30
-from com.redhat.PlayerScore p WHERE p.human=true and p.score: [35 to 50]
-from com.redhat.PlayerScore p WHERE p.human=true and p.username:'will'~2
+# Testing Cross Site
+If you want to test Cross Suite replication, then:
+* Remove the players-score cache in Infinispan
