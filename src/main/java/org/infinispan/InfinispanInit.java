@@ -1,8 +1,7 @@
-package com.redhat;
+package org.infinispan;
 
-import com.redhat.model.GameStatus;
-import com.redhat.model.PlayerScore;
 import io.quarkus.infinispan.client.Remote;
+import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -11,6 +10,8 @@ import jakarta.inject.Inject;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.configuration.StringConfiguration;
+import org.infinispan.model.GameStatus;
+import org.infinispan.model.PlayerScore;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class InfinispanInit {
 
    public static final String GAME_ID = "1e1348c774d01c7c";
+   public static final String NYC_SITE = "nyc-site";
 
    @Inject
    RemoteCacheManager cacheManager;
@@ -55,7 +57,7 @@ public class InfinispanInit {
       cacheManager.administration().getOrCreateCache(PlayerScore.PLAYERS_SCORES, new StringConfiguration(lonCache));
 
       // Create the NYC backup cache programmatically
-      cacheManager.switchToCluster("nyc-site");
+      cacheManager.switchToCluster(NYC_SITE);
       String nycCacheBackups = new String(InfinispanInit.class.getClassLoader()
               .getResourceAsStream("scores_nyc.json").readAllBytes(), StandardCharsets.UTF_8);
       cacheManager.administration().getOrCreateCache(PlayerScore.PLAYERS_SCORES, new StringConfiguration(nycCacheBackups));
@@ -105,6 +107,20 @@ public class InfinispanInit {
                  actualPlayerScore.bonus() + bonus[random.nextInt(bonus.length)]);
          playerScores.put(player.getPlayerScoreId(), newPlayerScore);
       } else {
+         if(!cacheManager.getCacheNames().contains(PlayerScore.PLAYERS_SCORES)) {
+            Log.warn(String.format("%s cache does not exit yet in LON", PlayerScore.PLAYERS_SCORES));
+            return;
+         }
+
+         cacheManager.switchToCluster(NYC_SITE);
+
+         if(!cacheManager.getCacheNames().contains(PlayerScore.PLAYERS_SCORES)) {
+            Log.warn(String.format("%s cache does not exit yet in NYC", PlayerScore.PLAYERS_SCORES));
+            return;
+         }
+
+         cacheManager.switchToDefaultCluster();
+
          for (int i = 0; i < 2; i ++) {
             for (String name: randomNames) {
                String matchId = UUID.randomUUID().toString();

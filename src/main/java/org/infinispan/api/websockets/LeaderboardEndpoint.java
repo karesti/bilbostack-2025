@@ -1,6 +1,5 @@
-package com.redhat.api.websockets;
+package org.infinispan.api.websockets;
 
-import com.redhat.model.PlayerScore;
 import io.quarkus.infinispan.client.Remote;
 import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
@@ -15,6 +14,7 @@ import jakarta.websocket.server.ServerEndpoint;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.api.query.Query;
+import org.infinispan.model.PlayerScore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,15 +61,14 @@ public class LeaderboardEndpoint {
       }
 
       if(!remoteCacheManager.getCacheNames().contains(PlayerScore.PLAYERS_SCORES)) {
-         Log.warn(String.format("%s cache does not exit", PlayerScore.PLAYERS_SCORES));
+         Log.warn(String.format("%s cache does not exit yet", PlayerScore.PLAYERS_SCORES));
          return;
       }
 
-
       if(topTenQuery == null ) {
          topTenQuery = playersScores
-//                 select p.username, p.score from com.redhat.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC
-                 .<PlayerScore>query("from com.redhat.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC")
+//                 select p.username, p.score from org.infinispan.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC
+                 .<PlayerScore>query("from org.infinispan.PlayerScore p WHERE p.human=true ORDER BY p.score DESC, p.timestamp ASC")
                  .maxResults(10);
       }
 

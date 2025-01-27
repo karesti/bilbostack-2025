@@ -1,4 +1,4 @@
-package com.redhat.model;
+package org.infinispan.model;
 
 import org.infinispan.protostream.annotations.Proto;
 
