@@ -1,44 +1,56 @@
 # Bilbo Stack 2025
-To run this demo you need:
 
-* Docker / Podman
-* Java 21 or later
+## Requirements:
+- Docker / Podman
+- Java 21+
 
-## Spin up Infinispan
-The docker compose file spins up
-* A LON cluster of 3
-* A NYC cluster of 1
+## Spin Up Infinispan
 
-Both cluster connect locally using Cross Site replication.
+The Docker Compose file sets up:
+- A LON cluster with 3 nodes
+- A NYC cluster with 1 node
+
+Both clusters use Cross Site replication.
 
 ```shell
 docker/podman compose up
 ```
-Use **admin/pass** and log in **LON** in your browser opening localhost:11222
-Use **admin/pass** and log in **NYC** in your browser opening localhost:31222
 
+- Log in to **LON** at `localhost:11222` (user: **admin**, password: **pass**)
+- Log in to **NYC** at `localhost:31222` (user: **admin**, password: **pass**)
 
-## Build the Quarkus project
+## Build and Run the Quarkus Project
 
-The leaderboard is a Quarkus application what provides a leadeboard
-of a top 10 players.
-
-Data is stores in Infinispan, using Protobuf serialisation.
-The server keeps the schema.
+The leaderboard is a Quarkus app that shows the top 10 players. 
+Data is stored in Infinispan with Protobuf serialization.
+Build and run the application:
 
 ```shell
-./mvnw clean install
-java -jar ./target/quarkus-app/quarkus-run.jar  
+./mvnw clean install 
+java -jar ./target/quarkus-app/quarkus-run.jar
 ```
 
-Open http://localhost:8080/ in your browser.
-The app inserts data and schedules scores.
+Visit [http://localhost:8080](http://localhost:8080) to view the app.
 
-This project does not use INDEXED caches.
-Queries are performed without specific indexes. 
-To improve queries performance, adding indexing is recommened.
-For simplicity in this demo, I did remove it.
+This demo doesn't use indexed caches for simplicity. 
+Adding indexing is recommended for better query performance.
 
-# Testing Cross Site
-If you want to test Cross Suite replication, then:
-* Remove the players-score cache in Infinispan
+You should be able to see in the console (LON and NYC):
+
+![infinispan-console.png](infinispan-console.png)
+
+## Testing Cross-Site Replication
+
+The app creates a cache in NYC, using active-active replication:
+- LON is the backup for NYC
+- NYC is the backup for LON
+
+Test and remove caches via the cache creation wizard in the console.
+
+## Presentation
+Here is the PDF holding presentation slides
+
+[Bilbostack - 2025.pdf](Bilbostack%20-%202025.pdf)
+
+* Infinispan https://infinispan.org/get-started/
+* Quarkus https://quarkus.io/get-started/
