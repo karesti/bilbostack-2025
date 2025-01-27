@@ -50,7 +50,9 @@ Test and remove caches via the cache creation wizard in the console.
 ## Presentation
 Here is the PDF holding presentation slides
 
-[Bilbostack - 2025.pdf](Bilbostack%20-%202025.pdf)
+* [Bilbostack - 2025.pdf (spanish)](Bilbostack%20-%202025.pdf)
+* [Bilbostack - 2025.pdf (english)](EN_Bilbostack%20-%202025.pdf)
 
+## Go further
 * Infinispan https://infinispan.org/get-started/
 * Quarkus https://quarkus.io/get-started/
