@@ -37,7 +37,7 @@ Adding indexing is recommended for better query performance.
 
 You should be able to see in the console (LON and NYC):
 
-![infinispan-console.png](infinispan-console.png)
+![infinispan-console1.png](infinispan-console.png)
 
 *Query:*
 ```text
